@@ -2,7 +2,7 @@
 
 本文档介绍如何使用 Docker + Kvrocks 部署 KatelyaTV。
 
-> **⚠️ 重要提醒**：Kvrocks 部署需要配置管理员账号（`USERNAME` 和 `PASSWORD`），否则会出现"页面显示账号密码登录但无法登录"的问题！
+> **⚠️ 重要提醒**：Kvrocks 部署需要配置管理员账号（`USERNAME` 和 `AUTH_PASSWORD`），否则会出现"页面显示账号密码登录但无法登录"的问题！
 
 ## 🚀 快速开始
 
@@ -30,7 +30,7 @@ KVROCKS_DATABASE=0
 
 # 管理员账号配置（必填！）
 USERNAME=admin
-PASSWORD=your_admin_password
+AUTH_PASSWORD=your_admin_password
 
 # 用户注册配置
 NEXT_PUBLIC_ENABLE_REGISTER=true
@@ -86,7 +86,7 @@ docker-compose -f docker-compose.kvrocks.auth.yml up -d
 **现象：**
 
 - 部署后页面显示用户名+密码登录界面
-- 但是只配置了 `PASSWORD` 环境变量
+- 但是只配置了 `AUTH_PASSWORD` 环境变量
 - 无法登录或提示"用户名或密码错误"
 
 **原因：**

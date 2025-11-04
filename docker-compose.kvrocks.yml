@@ -15,7 +15,7 @@ services:
       
       # 管理员账号配置（必填）
       USERNAME: ${USERNAME:-admin}
-      PASSWORD: ${PASSWORD}
+      AUTH_PASSWORD: ${AUTH_PASSWORD}
       
       # 站点配置
       NEXT_PUBLIC_ENABLE_REGISTER: ${NEXT_PUBLIC_ENABLE_REGISTER:-true}

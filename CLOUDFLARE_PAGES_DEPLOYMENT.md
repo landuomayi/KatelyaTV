@@ -30,8 +30,8 @@
    - **Type**: Plain text
    - **Environment**: Production 和 Preview 都要添加
 
-   **PASSWORD 变量：** ⭐ **关键变量**
-   - **Variable name**: `PASSWORD`
+   **AUTH_PASSWORD 变量：** ⭐ **关键变量**
+   - **Variable name**: `AUTH_PASSWORD`
    - **Value**: `您设置的访问密码`
    - **Type**: Plain text (**重要：不要选择密码类型**)
    - **Environment**: Production 和 Preview 都要添加
@@ -46,7 +46,7 @@
 ```bash
 # ⭐ 关键必需变量（缺一不可）
 USERNAME=katelya                          # 站长用户名
-PASSWORD=your-secure-password             # 访问密码
+AUTH_PASSWORD=your-secure-password        # 访问密码
 NEXT_PUBLIC_STORAGE_TYPE=d1              # 存储类型
 NEXT_PUBLIC_SITE_NAME=KatelyaTV          # 站点名称
 NODE_ENV=production                      # 运行环境
@@ -58,8 +58,8 @@ IMAGE_PROXY_ENABLED=true
 
 **⚠️ 重要提醒：**
 
-- `PASSWORD` 必须设置为 "Plain text" 类型，不要选择 "Secret" 或 "Password" 类型
-- `PASSWORD` 的值应该与您之前在本地或其他环境中使用的密码一致
+- `AUTH_PASSWORD` 必须设置为 "Plain text" 类型，不要选择 "Secret" 或 "Password" 类型
+- `AUTH_PASSWORD` 的值应该与您之前在本地或其他环境中使用的密码一致
 
 #### 第三步：检查 D1 数据库绑定
 
@@ -202,13 +202,13 @@ export const runtime = 'edge';
 ```bash
 # 在 Cloudflare Pages 控制台检查这些变量
 USERNAME=katelya                          # ❌ 经常缺失
-PASSWORD=your-password                    # ❌ 最关键，经常缺失或类型错误
+AUTH_PASSWORD=your-password               # ❌ 最关键，经常缺失或类型错误
 NEXT_PUBLIC_STORAGE_TYPE=d1              # ✅ 通常已设置
 NEXT_PUBLIC_SITE_NAME=KatelyaTV          # ✅ 通常已设置
 NODE_ENV=production                       # ✅ 通常已设置
 ```
 
-**特别注意 PASSWORD 变量：**
+**特别注意 AUTH_PASSWORD 变量：**
 
 - ✅ 正确：类型选择 "Plain text"
 - ❌ 错误：类型选择 "Secret" 或 "Password"
@@ -225,11 +225,11 @@ NODE_ENV=production                       # ✅ 通常已设置
 
 | 错误现象 | 原因 | 解决方案 |
 |---------|------|----------|
-| 500 错误 | PASSWORD 未设置或类型错误 | 设置 PASSWORD 为 Plain text 类型 |
+| 500 错误 | AUTH_PASSWORD 未设置或类型错误 | 设置 AUTH_PASSWORD 为 Plain text 类型 |
 | 500 + 管理页面无法访问 | USERNAME 未设置 | 添加 USERNAME 环境变量 |
-| 重定向到 /warning 页面 | PASSWORD 环境变量缺失 | 检查 PASSWORD 变量设置 |
+| 重定向到 /warning 页面 | AUTH_PASSWORD 环境变量缺失 | 检查 AUTH_PASSWORD 变量设置 |
 | 500 + 数据库相关错误 | D1 绑定问题 | 检查数据库绑定配置 |
-| 构建成功但运行失败 | 关键环境变量缺失 | 检查 USERNAME 和 PASSWORD |
+| 构建成功但运行失败 | 关键环境变量缺失 | 检查 USERNAME 和 AUTH_PASSWORD |
 
 ### 验证部署成功
 

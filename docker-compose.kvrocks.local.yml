@@ -34,7 +34,7 @@ services:
       KVROCKS_DIR: /var/lib/kvrocks/data
       KVROCKS_LOG_LEVEL: info
       # 可选：设置密码
-      KVROCKS_REQUIREPASS: ${KVROCKS_PASSWORD:-}
+      KVROCKS_REQUIREPASS: ${AUTH_PASSWORD:-}
     volumes:
       # 持久化数据存储
       - kvrocks-data:/var/lib/kvrocks/data
