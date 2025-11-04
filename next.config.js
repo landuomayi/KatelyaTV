@@ -58,6 +58,13 @@ const nextConfig = {
       net: false,
       tls: false,
       crypto: false,
+      async_hooks: false,
+      fs: false,
+      path: false,
+      os: false,
+      stream: false,
+      http: false,
+      https: false,
     };
 
     return config;
