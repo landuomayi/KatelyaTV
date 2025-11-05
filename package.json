@@ -7,9 +7,9 @@
     "build:next": "next build",
     "pages:build": "npx open-next@latest build --skip-build",
     "pages:build:full": "npm run build && npm run pages:build",
-    "pages:build-legacy": "npx @cloudflare/next-on-pages@latest",
-    "next-on-pages": "npx @cloudflare/next-on-pages@latest",
-    "pages:deploy": "npm run next-on-pages && wrangler pages deploy __next-on-pages-dist__ --project-name=katelyatv",
+    "pages:build-legacy": "npx @cloudflare/next-on-pages@1.11.3",
+    "next-on-pages": "npx @cloudflare/next-on-pages@1.11.3",
+    "pages:deploy": "npm run pages:build:full && wrangler pages deploy .vercel/output/static --project-name=katelyatv",
     "dev": "next dev",
     "start": "next start",
     "lint": "next lint",
@@ -24,6 +24,7 @@
     "gen:manifest": "node scripts/generate-manifest.js",
     "gen:version": "node scripts/generate-version.js",
     "postbuild": "echo 'Build completed - sitemap generation disabled'",
+    "pages:build:cf": "npm run build && npx @cloudflare/next-on-pages@1.11.3",
     "prepare": "husky install"
   },
   "dependencies": {

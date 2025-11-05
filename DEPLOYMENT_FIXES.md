@@ -76,13 +76,41 @@ config.plugins.push({
 });
 ```
 
+## 问题4：Node.js版本兼容性问题
+
+**问题描述：**
+部署失败，出现`undici@7.14.0`需要`node >=20.18.1`的错误，但Cloudflare Pages环境使用的是`node v20.10.0`。
+
+**根本原因：**
+最新版本的依赖包与Cloudflare Pages提供的Node.js版本不兼容。
+
+**解决方案：**
+1. 将`@cloudflare/next-on-pages`版本锁定为与Node.js v20.10.0兼容的1.11.3版本
+2. 更新构建脚本以使用正确的工具链
+
+### 具体修改
+
+**package.json中的更新：**
+- 将`@cloudflare/next-on-pages`版本从`@latest`固定为`@1.11.3`
+- 更新部署脚本以使用正确的输出目录
+- 添加专用的Cloudflare构建脚本
+
 ## 推荐的Cloudflare Pages构建配置
 
-在Cloudflare Pages控制台中设置以下构建配置：
+### 配置1：使用@cloudflare/next-on-pages构建
+在Cloudflare Pages控制台中使用以下构建配置：
+- 构建命令：`pnpm install --frozen-lockfile && pnpm run pages:build:cf`
+- 输出目录：`.vercel/output/static`
+- 环境：Node.js 20.x
 
-- **构建命令**: `pnpm install --frozen-lockfile && pnpm run pages:build:full`
-- **构建输出目录**: `.vercel/output/static`
-- **Node.js 版本**: `20.x`
+### 配置2：使用OpenNext构建（推荐）
+- 构建命令：`pnpm install --frozen-lockfile && pnpm run pages:build:full`
+- 输出目录：`.vercel/output/static`
+- 环境：Node.js 20.x
+
+这两种配置都已针对Cloudflare Pages环境进行了优化，解决了版本兼容性问题。
+
+请确保在部署前设置所有必要的环境变量，并按照文档中的配置进行操作。
 
 ## 环境变量要求
 
