@@ -3,7 +3,8 @@
   "version": "0.7.0-katelya",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "npx open-next@latest build",
+    "build:next": "next build",
     "pages:build": "npx open-next@latest build",
     "pages:build-legacy": "npx @cloudflare/next-on-pages@latest",
     "next-on-pages": "npx @cloudflare/next-on-pages@latest",

@@ -4,14 +4,6 @@ compatibility_flags = ["nodejs_compat"]
 # 使用__next-on-pages的输出目录
 pages_build_output_dir = "__next-on-pages-dist__"
 
-# 禁用Node.js兼容性标志，避免async_hooks依赖
-[functions]
-  node_compat = false
-
-# 确保构建命令使用我们修改的配置
-[build]
-  command = "npm run build && npm run next-on-pages"
-
 # 默认 D1 数据库配置（用于命令行操作）
 [[d1_databases]]
 binding = "DB"
