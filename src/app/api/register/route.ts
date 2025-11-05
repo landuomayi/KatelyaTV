@@ -15,35 +15,33 @@ const STORAGE_TYPE =
     | 'upstash'
     | undefined) || 'localstorage';
 
-// 生成签名
-async function generateSignature(
+// 生成签名（同步版本）
+function generateSignature(
   data: string,
   secret: string
-): Promise<string> {
-  const encoder = new TextEncoder();
-  const keyData = encoder.encode(secret);
-  const messageData = encoder.encode(data);
-
-  // 导入密钥
-  const key = await crypto.subtle.importKey(
-    'raw',
-    keyData,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-
-  // 生成签名
-  const signature = await crypto.subtle.sign('HMAC', key, messageData);
-
+): string {
+  // 简单的哈希实现，确保同步执行
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    const char = data.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // 转换为32位整数
+  }
+  
+  // 添加密钥混合
+  for (let i = 0; i < secret.length; i++) {
+    const char = secret.charCodeAt(i);
+    hash ^= char;
+    hash = ((hash << 7) | (hash >>> 25)) * 31;
+    hash = hash & hash; // 保持为32位整数
+  }
+  
   // 转换为十六进制字符串
-  return Array.from(new Uint8Array(signature))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  return Math.abs(hash).toString(16);
 }
 
 // 生成认证Cookie（带签名）
-async function generateAuthCookie(username: string): Promise<string> {
+function generateAuthCookie(username: string): string {
   const authData: any = {
     role: 'user',
     username,
@@ -52,7 +50,7 @@ async function generateAuthCookie(username: string): Promise<string> {
 
   // 使用process.env.AUTH_PASSWORD作为签名密钥，而不是用户密码
   const signingKey = process.env.AUTH_PASSWORD || '';
-  const signature = await generateSignature(username, signingKey);
+  const signature = generateSignature(username, signingKey);
   authData.signature = signature;
 
   return encodeURIComponent(JSON.stringify(authData));
@@ -106,7 +104,7 @@ export async function POST(req: NextRequest) {
 
       // 注册成功，设置认证cookie
       const response = NextResponse.json({ ok: true });
-      const cookieValue = await generateAuthCookie(username);
+      const cookieValue = generateAuthCookie(username);
       const expires = new Date();
       expires.setDate(expires.getDate() + 7); // 7天过期
 
