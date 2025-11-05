@@ -54,7 +54,7 @@ async function fetchDoubanData(
   }
 }
 
-export const runtime = 'edge';
+// 移除edge runtime配置，使用默认的server runtime以兼容OpenNext构建
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

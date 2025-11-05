@@ -6,7 +6,7 @@ import { getAuthInfoFromCookie } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { Favorite } from '@/lib/types';
 
-export const runtime = 'edge';
+// 移除edge runtime配置，使用默认的server runtime以兼容OpenNext构建
 
 /**
  * GET /api/favorites

@@ -82,31 +82,72 @@ config.plugins.push({
 部署失败，出现`undici@7.14.0`需要`node >=20.18.1`的错误，但Cloudflare Pages环境使用的是`node v20.10.0`。
 
 **根本原因：**
-最新版本的依赖包与Cloudflare Pages提供的Node.js版本不兼容。
+最新版本的依赖包（特别是undici）与Cloudflare Pages提供的Node.js v20.10.0版本不兼容。
 
 **解决方案：**
-1. 将`@cloudflare/next-on-pages`版本锁定为与Node.js v20.10.0兼容的1.11.3版本
-2. 更新构建脚本以使用正确的工具链
+1. 在package.json中添加resolutions字段，明确锁定undici版本为5.28.4，该版本与Node.js v20.10.0完全兼容
+2. 更新构建脚本，添加专门的Cloudflare兼容构建脚本
+3. 在wrangler.toml中指定正确的构建命令
+4. 创建辅助脚本确保依赖正确安装和锁定
 
 ### 具体修改
 
 **package.json中的更新：**
-- 将`@cloudflare/next-on-pages`版本从`@latest`固定为`@1.11.3`
-- 更新部署脚本以使用正确的输出目录
-- 添加专用的Cloudflare构建脚本
+```json
+{
+  "scripts": {
+    "build": "next build",
+    "pages:build": "npx open-next@3.1.3 build --skip-build",
+    "pages:build:full": "npm run build && npm run pages:build",
+    "pages:build:cf-compat": "npm run build && npx open-next@3.1.3 build --skip-build --experimental-minify",
+    "fix:undici": "pnpm add undici@5.28.4"
+  },
+  "resolutions": {
+    "undici": "5.28.4"
+  }
+}
+```
+
+**wrangler.toml中的更新：**
+```toml
+# 指定Cloudflare Pages使用的构建命令
+pages_build_command = "pnpm install --frozen-lockfile && pnpm run pages:build:cf-compat"
+```
+
+### 辅助脚本
+
+我们创建了两个辅助脚本，帮助确保构建兼容性：
+
+1. **fix-node-compatibility.js**: 用于清理和重新安装依赖，并确保undici版本正确锁定
+   ```bash
+   node scripts/fix-node-compatibility.js
+   ```
+
+2. **test-build-compatibility.js**: 用于在本地测试构建兼容性
+   ```bash
+   node scripts/test-build-compatibility.js
+   ```
+
+这些脚本提供了自动化的方式来解决和验证Node.js版本兼容性问题。
 
 ## 推荐的Cloudflare Pages构建配置
 
-### 配置1：使用@cloudflare/next-on-pages构建
+### 配置1：使用兼容性构建脚本（推荐）
 在Cloudflare Pages控制台中使用以下构建配置：
-- 构建命令：`pnpm install --frozen-lockfile && pnpm run pages:build:cf`
+- 构建命令：`pnpm install --frozen-lockfile && pnpm run pages:build:cf-compat`
 - 输出目录：`.vercel/output/static`
 - 环境：Node.js 20.x
 
-### 配置2：使用OpenNext构建（推荐）
+### 配置2：使用OpenNext构建
 - 构建命令：`pnpm install --frozen-lockfile && pnpm run pages:build:full`
 - 输出目录：`.vercel/output/static`
 - 环境：Node.js 20.x
+
+### 本地验证步骤
+在部署到Cloudflare Pages之前，建议先在本地验证构建兼容性：
+1. 运行兼容性修复脚本：`node scripts/fix-node-compatibility.js`
+2. 运行构建测试脚本：`node scripts/test-build-compatibility.js`
+3. 确保构建测试通过后再部署到生产环境
 
 这两种配置都已针对Cloudflare Pages环境进行了优化，解决了版本兼容性问题。
 
