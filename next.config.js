@@ -76,10 +76,10 @@ const nextConfig = {
                  resolveData.request.startsWith('async_hooks/') ||
                  resolveData.request === 'node:async_hooks' ||
                  resolveData.request.startsWith('node:async_hooks/'))) {
-              // 返回一个空模块，而不是抛出错误
-              resolveData.request = false;
+              // 对于bailing钩子，返回false来忽略该请求
+              return false;
             }
-            return resolveData;
+            // 对于bailing钩子，不返回修改后的对象，直接修改它
           });
         });
       }

@@ -41,6 +41,41 @@ pages_build_output_dir = "__next-on-pages-dist__"
 pages_build_output_dir = ".vercel/output/static"
 ```
 
+## 问题3：Webpack钩子配置错误
+
+**问题描述：**
+Next.js 14.2.30使用的Webpack版本将`NormalModuleFactory.beforeResolve`钩子从waterfall钩子更改为bailing钩子，导致原有的BlockAsyncHooks插件配置不再兼容。错误信息为：
+```
+NormalModuleFactory.beforeResolve (NormalModuleReplacementPlugin, IgnorePlugin, IgnorePlugin, BlockAsyncHooks) is no longer a waterfall hook, but a bailing hook instead. Do not return the passed object, but modify it instead.
+```
+
+**根本原因：**
+Webpack钩子API变更导致插件配置不兼容。
+
+**解决方案：**
+更新next.config.js中的BlockAsyncHooks插件配置，按照bailing钩子的要求修改：
+
+```javascript
+config.plugins.push({
+  apply: (compiler) => {
+    compiler.hooks.normalModuleFactory.tap('BlockAsyncHooks', (nmf) => {
+      nmf.hooks.beforeResolve.tap('BlockAsyncHooks', (resolveData) => {
+        // 检查是否尝试导入async_hooks相关模块
+        if (resolveData.request && 
+            (resolveData.request === 'async_hooks' || 
+             resolveData.request.startsWith('async_hooks/') ||
+             resolveData.request === 'node:async_hooks' ||
+             resolveData.request.startsWith('node:async_hooks/'))) {
+          // 对于bailing钩子，返回false来忽略该请求
+          return false;
+        }
+        // 对于bailing钩子，不返回修改后的对象，直接修改它
+      });
+    });
+  }
+});
+```
+
 ## 推荐的Cloudflare Pages构建配置
 
 在Cloudflare Pages控制台中设置以下构建配置：
