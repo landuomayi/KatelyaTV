@@ -7,7 +7,7 @@ import { getConfig } from '@/lib/config';
 import { getStorage } from '@/lib/db';
 import { IStorage } from '@/lib/types';
 
-// 移除edge runtime配置，使用默认的server runtime以兼容OpenNext构建
+export const runtime = 'edge';
 
 // 支持的操作类型
 const ACTIONS = [

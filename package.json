@@ -3,14 +3,8 @@
   "version": "0.7.0-katelya",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "build:next": "next build",
-    "pages:build": "npx open-next@3.1.3 build --skip-build",
-    "pages:build:full": "npm run build && npm run pages:build",
-    "pages:build-legacy": "npx @cloudflare/next-on-pages@1.11.3",
-    "next-on-pages": "npx @cloudflare/next-on-pages@1.11.3",
-    "pages:deploy": "npm run pages:build:full && wrangler pages deploy .vercel/output/static --project-name=katelyatv",
-    "dev": "next dev",
+    "dev": "npm run gen:runtime && npm run gen:manifest && next dev -H 0.0.0.0",
+    "build": "npm run gen:runtime && npm run gen:manifest && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "eslint src --fix && npm run format",
@@ -24,15 +18,11 @@
     "gen:manifest": "node scripts/generate-manifest.js",
     "gen:version": "node scripts/generate-version.js",
     "postbuild": "echo 'Build completed - sitemap generation disabled'",
-    "pages:build:cf": "npm run build && npx @cloudflare/next-on-pages@1.11.3",
     "prepare": "husky install",
-    "pages:build:cf-compat": "npm run build && npx @cloudflare/next-on-pages@1.11.3 --experimental-minify",
-    "fix:undici": "pnpm add undici@5.28.4 --save-exact --save-peer"
-  },
-  "resolutions": {
-    "undici": "5.28.4"
+    "pages:build": "pnpm gen:runtime && pnpm gen:manifest && next build && npx @cloudflare/next-on-pages --experimental-minify"
   },
   "dependencies": {
+    "@cloudflare/next-on-pages": "^1.13.12",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",

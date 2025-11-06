@@ -5,7 +5,7 @@ import { getStorage } from '@/lib/db';
 import { UserSettings } from '@/lib/types';
 
 // 设置运行时为 Edge Runtime，确保部署兼容性
-// 移除edge runtime配置，使用默认的server runtime以兼容OpenNext构建
+export const runtime = 'edge';
 
 // 获取用户设置
 export async function GET(_request: NextRequest) {

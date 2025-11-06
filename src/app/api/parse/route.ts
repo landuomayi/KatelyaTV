@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // 强制使用 Edge Runtime 以支持 Cloudflare Pages
-// 移除edge runtime配置，使用默认的server runtime以兼容OpenNext构建
+export const runtime = 'edge';
 
 // 常用的视频解析接口列表
 const PARSE_APIS = [

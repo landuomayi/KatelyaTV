@@ -2,24 +2,14 @@
 
 ## 问题描述
 
-Cloudflare Pages 部署遇到两个主要问题：
-
-1. **绑定名称冲突**：
+在Cloudflare Pages部署时遇到绑定名称冲突：
 ```
 Error: Failed to publish your Function. Got error: Binding name 'PASSWORD' already in use.
 ```
 
-2. **wrangler.toml 文件损坏**：
-```
-ParseError: Unterminated string
-lineText: 'name = "katelyat[env.preview.vars]'
-```
-
 ## 解决方案
 
-✅ **第一步**：将环境变量名从 `PASSWORD` 更改为 `AUTH_PASSWORD` 以避免Cloudflare的保留绑定名称冲突。
-
-✅ **第二步**：修复损坏的 `wrangler.toml` 文件，文件结构被损坏导致语法错误。
+我们已经将环境变量名从 `PASSWORD` 更改为 `AUTH_PASSWORD` 以避免Cloudflare的保留绑定名称冲突。
 
 ## 需要的操作
 

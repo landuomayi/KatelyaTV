@@ -5,7 +5,7 @@ import { getStorage } from '@/lib/db';
 import { EpisodeSkipConfig } from '@/lib/types';
 
 // 配置 Edge Runtime - Cloudflare Pages 要求
-// 移除edge runtime配置，使用默认的server runtime以兼容OpenNext构建
+export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {

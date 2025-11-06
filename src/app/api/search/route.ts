@@ -5,7 +5,7 @@ import { addCorsHeaders, handleOptionsRequest } from '@/lib/cors';
 import { getStorage } from '@/lib/db';
 import { searchFromApi } from '@/lib/downstream';
 
-// 移除edge runtime配置，使用默认的server runtime以兼容OpenNext构建
+export const runtime = 'edge';
 
 // 处理OPTIONS预检请求（OrionTV客户端需要）
 export async function OPTIONS() {

@@ -4,47 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { getAuthInfoFromCookie } from '@/lib/auth';
 
-// 简单的同步哈希函数，用于Cloudflare Edge Runtime兼容性
-export function simpleHash(data: string, secret: string): string {
-  // 简单的哈希实现，确保同步执行
-  let hash = 0;
-  for (let i = 0; i < data.length; i++) {
-    const char = data.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  
-  // 添加密钥混合
-  for (let i = 0; i < secret.length; i++) {
-    const char = secret.charCodeAt(i);
-    hash ^= char;
-    hash = ((hash << 7) | (hash >>> 25)) * 31;
-    hash = hash & hash; // 保持为32位整数
-  }
-  
-  // 转换为十六进制字符串
-  return Math.abs(hash).toString(16);
-}
-
-// 验证签名（同步版本）
-function verifySignature(
-  data: string,
-  signature: string,
-  secret: string
-): boolean {
-  try {
-    // 使用简单哈希替代crypto.subtle
-    const expectedSignature = simpleHash(data, secret);
-    
-    // 进行简单的字符串比较
-    return expectedSignature === signature;
-  } catch (error) {
-    console.error('签名验证失败:', error);
-    return false;
-  }
-}
-
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 跳过不需要认证的路径
@@ -83,7 +43,7 @@ export function middleware(request: NextRequest) {
 
   // 验证签名（如果存在）
   if (authInfo.signature) {
-    const isValidSignature = verifySignature(
+    const isValidSignature = await verifySignature(
       authInfo.username,
       authInfo.signature,
       process.env.AUTH_PASSWORD || ''
@@ -97,6 +57,44 @@ export function middleware(request: NextRequest) {
 
   // 签名验证失败或不存在签名
   return handleAuthFailure(request, pathname);
+}
+
+// 验证签名
+async function verifySignature(
+  data: string,
+  signature: string,
+  secret: string
+): Promise<boolean> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const messageData = encoder.encode(data);
+
+  try {
+    // 导入密钥
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify']
+    );
+
+    // 将十六进制字符串转换为Uint8Array
+    const signatureBuffer = new Uint8Array(
+      signature.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || []
+    );
+
+    // 验证签名
+    return await crypto.subtle.verify(
+      'HMAC',
+      key,
+      signatureBuffer,
+      messageData
+    );
+  } catch (error) {
+    console.error('签名验证失败:', error);
+    return false;
+  }
 }
 
 // 处理认证失败的情况

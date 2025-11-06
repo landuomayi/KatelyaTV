@@ -2,12 +2,7 @@
 
 import { AdminConfig } from './admin.types';
 import { getStorage } from './db';
-
-// 默认运行时配置
-const runtimeConfig = {
-  cache_time: 3600,
-  api_site: {}
-};
+import runtimeConfig from './runtime';
 
 export interface ApiSite {
   key: string;

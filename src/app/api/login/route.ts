@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getConfig } from '@/lib/config';
 import { db } from '@/lib/db';
 
-// 移除edge runtime配置，使用默认的server runtime以兼容OpenNext构建
+export const runtime = 'edge';
 
 // 读取存储类型环境变量，默认 localstorage
 const STORAGE_TYPE =
@@ -15,32 +15,40 @@ const STORAGE_TYPE =
     | 'upstash'
     | undefined) || 'localstorage';
 
-// 生成签名 - 使用简单的哈希方法确保Edge Runtime兼容性
-function generateSignature(
+// 生成签名
+async function generateSignature(
   data: string,
   secret: string
-): string {
-  // 使用简单的哈希算法，确保在Edge Runtime中可用
-  let hash = 0;
-  const combined = data + secret;
-  
-  for (let i = 0; i < combined.length; i++) {
-    const char = combined.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // 转换为32位整数
-  }
-  
+): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const messageData = encoder.encode(data);
+
+  // 导入密钥
+  const key = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  // 生成签名
+  const signature = await crypto.subtle.sign('HMAC', key, messageData);
+
   // 转换为十六进制字符串
-  return Math.abs(hash).toString(16).padStart(8, '0');
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 // 生成认证Cookie（带签名）
-function generateAuthCookie(
+async function generateAuthCookie(
   username?: string,
   password?: string,
   role?: 'owner' | 'admin' | 'user',
   includePassword = false
-): string {
+): Promise<string> {
   const authData: any = { role: role || 'user' };
 
   // 只在需要时包含 password
@@ -51,7 +59,7 @@ function generateAuthCookie(
   if (username && process.env.AUTH_PASSWORD) {
     authData.username = username;
     // 使用密码作为密钥对用户名进行签名
-    const signature = generateSignature(username, process.env.AUTH_PASSWORD);
+    const signature = await generateSignature(username, process.env.AUTH_PASSWORD);
     authData.signature = signature;
     authData.timestamp = Date.now(); // 添加时间戳防重放攻击
   }
@@ -95,7 +103,7 @@ export async function POST(req: NextRequest) {
 
       // 验证成功，设置认证cookie
       const response = NextResponse.json({ ok: true });
-      const cookieValue = generateAuthCookie(
+      const cookieValue = await generateAuthCookie(
         undefined,
         password,
         'user',
@@ -132,7 +140,7 @@ export async function POST(req: NextRequest) {
     ) {
       // 验证成功，设置认证cookie
       const response = NextResponse.json({ ok: true });
-      const cookieValue = generateAuthCookie(
+      const cookieValue = await generateAuthCookie(
         username,
         password,
         'owner',
@@ -172,7 +180,7 @@ export async function POST(req: NextRequest) {
 
       // 验证成功，设置认证cookie
       const response = NextResponse.json({ ok: true });
-      const cookieValue = generateAuthCookie(
+      const cookieValue = await generateAuthCookie(
         username,
         password,
         user?.role || 'user',
